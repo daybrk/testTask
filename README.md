@@ -42,4 +42,4 @@
 
 <p>Обновить тип новости : http://localhost:8080/news/type-update/{{newsTypeId}}</p>
 
-<b>Получить определённый тип новости по id : http://localhost:8080/news/type-found/{{newsTypeId}}</b>
+<p>Получить определённый тип новости по id : http://localhost:8080/news/type-found/{{newsTypeId}}</p>
