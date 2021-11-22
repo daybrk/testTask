@@ -24,14 +24,11 @@ public class NewsController {
 
     // Создание типа новости
     @PostMapping("/type-creation")
-    public ResponseEntity newsTypeCreation(@RequestParam String typeName, @RequestParam String typeColor) {
+    public ResponseEntity newsTypeCreation(@RequestBody NewsTypeEntity newsTypeEntity) {
         try {
-            if (typeName == null || typeColor == null) {
+            if (newsTypeEntity.getTypeName() == null || newsTypeEntity.getTypeColor() == null) {
                 return ResponseEntity.badRequest().body("Данные введены не корректно");
             } else {
-                NewsTypeEntity newsTypeEntity = new NewsTypeEntity();
-                newsTypeEntity.setTypeName(typeName);
-                newsTypeEntity.setTypeColor(typeColor);
                 newsTypeRepo.save(newsTypeEntity);
                 return ResponseEntity.ok("Тип новости добален");
             }
@@ -82,14 +79,14 @@ public class NewsController {
     // Обновление типа новости
     @PutMapping("/type-update/{newsTypeId}")
     public ResponseEntity updateNewsType(@PathVariable(value = "newsTypeId") Long newsTypeId,
-                                         @RequestParam String typeName, @RequestParam String typeColor){
+                                         @RequestBody NewsTypeEntity updateType){
         try {
-            if (newsTypeId == null || typeName == null || typeColor == null) {
+            if (newsTypeId == null || updateType.getTypeName() == null || updateType.getTypeColor() == null) {
                 return ResponseEntity.badRequest().body("Данные введены не корректно");
             } else {
                 NewsTypeEntity newsTypeEntity = newsTypeRepo.findById(newsTypeId).orElseThrow(() -> new NoSuchElementException(""));
-                newsTypeEntity.setTypeName(typeName);
-                newsTypeEntity.setTypeColor(typeColor);
+                newsTypeEntity.setTypeName(updateType.getTypeName());
+                newsTypeEntity.setTypeColor(updateType.getTypeColor());
                 newsTypeRepo.save(newsTypeEntity);
                 return ResponseEntity.ok("Тип новости обновлён");
             }
@@ -101,22 +98,18 @@ public class NewsController {
     //CRUD Новостей
 
     // Создание новости
-    @PostMapping("/creation")
-    public ResponseEntity newsCreation( @RequestParam String newsName, @RequestParam String shortDescription,
-                              @RequestParam String fullDescription, @RequestParam  Long newsTypeId) {
-
+    @PostMapping("/creation/{newsTypeId}")
+    public ResponseEntity newsCreation(@PathVariable(value = "newsTypeId") Long newsTypeId,
+                                       @RequestBody NewsEntity newsEntity) {
         try {
-            if (newsName == null || shortDescription == null || fullDescription == null || newsTypeId == null) {
+            if (newsEntity.getNewsName() == null || newsEntity.getShortDescription() == null
+                    || newsEntity.getFullDescription() == null || newsTypeId == null) {
                 return ResponseEntity.badRequest().body("Данные введены неверно");
             } else {
-                NewsEntity newsEntity = new NewsEntity();
                 NewsTypeEntity newsTypeEntity = newsTypeRepo.findById(newsTypeId).orElseThrow(() -> new NoSuchElementException(""));
-                newsEntity.setNewsName(newsName);
-                newsEntity.setShortDescription(shortDescription);
-                newsEntity.setFullDescription(fullDescription);
                 newsEntity.setNewsTypeId(newsTypeEntity);
                 newsRepo.save(newsEntity);
-                return ResponseEntity.ok("Тип новости обновлён");
+                return ResponseEntity.ok("Тип новости добавлен");
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Произошла ошибка");
@@ -124,20 +117,20 @@ public class NewsController {
     }
 
     // Обновление новости
-    @PutMapping("/update/{newsId}")
-    public ResponseEntity newsUpdate(@PathVariable(value = "newsId") Long newsId, @RequestParam String newsName,
-                             @RequestParam String shortDescription, @RequestParam String fullDescription,
-                             @RequestParam  Long newsTypeId) {
-
+    @PutMapping("/update/{newsId}/{newsTypeId}")
+    public ResponseEntity newsUpdate(@PathVariable(value = "newsId") Long newsId,
+                                     @PathVariable(value = "newsTypeId") Long newsTypeId,
+                                     @RequestBody NewsEntity newsUpdate) {
         try {
-            if (newsId == null || newsName == null || shortDescription == null || fullDescription == null || newsTypeId == null) {
+            if (newsId == null || newsUpdate.getNewsName() == null || newsUpdate.getShortDescription() == null ||
+                    newsUpdate.getFullDescription() == null || newsTypeId == null) {
                 return ResponseEntity.badRequest().body("Данные введены неверно");
             } else {
                 NewsTypeEntity newsTypeEntity = newsTypeRepo.findById(newsTypeId).orElseThrow(() -> new NoSuchElementException(""));
                 NewsEntity newsEntity = newsRepo.findById(newsId).orElseThrow(() -> new NoSuchElementException(""));
-                newsEntity.setNewsName(newsName);
-                newsEntity.setShortDescription(shortDescription);
-                newsEntity.setFullDescription(fullDescription);
+                newsEntity.setNewsName(newsUpdate.getNewsName());
+                newsEntity.setShortDescription(newsUpdate.getShortDescription());
+                newsEntity.setFullDescription(newsUpdate.getFullDescription());
                 newsEntity.setNewsTypeId(newsTypeEntity);
                 newsRepo.save(newsEntity);
                 return ResponseEntity.ok("Новость обновлена");
@@ -176,6 +169,7 @@ public class NewsController {
             if (newsId != null) {
                 newsRepo.deleteById(newsId);
                 return ResponseEntity.ok("Новость удалена");
+
             } else {
                 return ResponseEntity.badRequest().body("Id новости не введён");
             }

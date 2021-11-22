@@ -1,35 +1,26 @@
+version: '3'
+
 services:
 
   mysql:
     container_name: mysql
-    networks:
-      - mysql-db
     image: mysql
-   #    command: --init-file /data/application/init.sql
-   #    volumes:
-   #        - ./init.sql:/data/application/init.sql
     environment:
       MYSQL_ROOT_PASSWORD: Mysql321!
+
       MYSQL_DATABASE: newsdb
+    volumes:
+      - dbdata:/var/lib/mysql
     ports:
-      - "3307:3306"
+      - "3306:3306"
 
   spring:
     container_name: spring
-    networks:
-      - mysql-db
-    image: testtask
+    image: daybrk/test
     depends_on:
       - mysql
     ports:
       - "8080:8080"
-    volumes:
-      - .:/code
-      - logvolume01:/var/log
 
 volumes:
-  logvolume01: {}
-
-networks:
-  mysql-db:
-    driver: bridge
+  dbdata:
